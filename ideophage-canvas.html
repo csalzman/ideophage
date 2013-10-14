@@ -1,0 +1,111 @@
+<html>
+<head>
+	<style>
+	</style>
+	<script type="text/javascript" src="javascript/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="javascript/jqueryhotkeys.js"></script>
+	<script type="text/javascript" src="javascript/key_status.js"></script>
+</head>
+
+<body>
+	
+
+	<script type="text/javascript" src="javascript/ideophage-canvas.js"></script>
+	
+	<script type="text/javascript">
+		var sprite = new Image();
+		sprite.src = "assets/ada_walking1.gif";
+
+		var background_image = new Image();
+		background_image.src = "assets/forgetfulroom_scene.gif";
+
+		var pedastal_image = new Image();
+		pedastal_image.src = "assets/pedastal.png";
+		
+
+		Number.prototype.clamp = function(min, max) {
+		  return Math.min(Math.max(this, min), max);
+		};
+		
+		var CANVAS_WIDTH = 800;
+		var CANVAS_HEIGHT = 600;
+
+		var canvasElement = $("<canvas width='" + CANVAS_WIDTH + 
+		                      "' height='" + CANVAS_HEIGHT + "'></canvas>");
+		var canvas = canvasElement.get(0).getContext("2d");
+		canvasElement.appendTo('body');
+
+		var FPS = 30;
+		setInterval(function() {
+		  update();
+		  draw();
+		}, 1000/FPS);
+		
+		var player = {
+		  x: 220,
+		  y: 400,
+		  width: 85,
+		  height: 125,
+		  draw: function() {
+			canvas.drawImage(sprite, this.x, this.y, this.width, this.height);			
+		  }
+		};
+
+		var background = {
+		  x: 0,
+		  y: 0,
+		  width: 800,
+		  height: 600,
+		  draw: function() {
+			canvas.drawImage(background_image, this.x, this.y);			
+		  }
+		};
+
+		var pedastal = {
+		  x: 290,
+		  y: 320,
+		  draw: function() {
+			canvas.drawImage(pedastal_image, this.x, this.y);			
+		  }
+		};
+		
+		function update() {
+			if (keydown.left) {
+				player.x -= 5;
+			}
+			if (keydown.right) {
+				player.x += 5;
+			}
+			if (keydown.up) {
+				player.y -= 5;
+				player.width -= player.width*.01;
+				player.height -= player.height*.01;
+			}
+			if (keydown.down) {
+				player.y += 5;
+				player.width += player.width*.01;
+				player.height += player.height*.01;
+				
+			}
+			player.x = player.x.clamp(0, CANVAS_WIDTH - player.width);
+		}
+
+		function draw() {
+			canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+			background.draw();
+
+			if (player.y < 395) {
+				player.draw();
+				pedastal.draw();				
+			}
+			else {
+				pedastal.draw();			
+				player.draw();
+			}
+		}
+
+	
+	</script>
+</body>
+
+</html>

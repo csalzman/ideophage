@@ -1,0 +1,83 @@
+<html>
+<head>
+	<style>
+	#canvas {
+		width:800px;
+		height:600px;
+		background-image:url("assets/forgetfulroom_scene.gif");
+		position:absolute;
+		padding:0;
+		margin:0;
+	}
+	#woman-bounding-box {
+		top:450px;
+		left:100px;
+		height:125px;
+		width:85px;
+		position:absolute;
+		z-index:5;
+	}
+	#woman {
+ 		height:100%;
+ 		width:100%;
+
+ 	}
+	#man-bounding-box {
+		top:450px;
+		left:500px;
+		height:140px;
+		width:52px;
+		position:absolute;
+		z-index:10;
+	}
+	#man {
+ 		height:100%;
+ 		width:100%;
+
+ 	}
+	#man2-bounding-box {
+		top:430px;
+		left:50px;
+		height:120px;
+		width:72px;
+		position:absolute;
+		z-index:1;
+	}
+	#man2 {
+ 		height:100%;
+ 		width:100%;
+
+ 	}
+
+
+	.left {
+		-moz-transform: scaleX(-1);
+	        -o-transform: scaleX(-1);
+	        -webkit-transform: scaleX(-1);
+	        transform: scaleX(-1);
+	        filter: FlipH;
+	        -ms-filter: "FlipH";		
+	}
+	</style>
+</head>
+
+<body>
+	
+	<div id="canvas">
+		<div id="woman-bounding-box">
+			<img id="woman" src="assets/woman.png">
+		</div>
+		<div id="man-bounding-box">
+			<img id="man" src="assets/janitor1.gif" class="left">
+		</div>
+		<div id="man2-bounding-box">
+			<img id="man2" src="assets/curator1.gif" >
+		</div>
+
+		
+	</div>
+
+	<script type="text/javascript" src="javascript/ideophate-initial.js"></script>
+</body>
+
+</html>
