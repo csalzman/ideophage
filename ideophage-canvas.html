@@ -22,7 +22,6 @@
 		var pedastal_image = new Image();
 		pedastal_image.src = "assets/pedastal.png";
 		
-
 		Number.prototype.clamp = function(min, max) {
 		  return Math.min(Math.max(this, min), max);
 		};
@@ -68,11 +67,23 @@
 			canvas.drawImage(pedastal_image, this.x, this.y);			
 		  }
 		};
+
+		var inventory = {
+		  x: 0,
+		  y: 0,
+		  active: 0,
+		  draw: function() {
+	  		canvas.globalAlpha=0.5;
+  		    canvas.fillRect(this.x, this.y, 800,100);
+	  		canvas.globalAlpha=1;			
+		  }
+		};
+		
 		
 		function update() {
 			if (keydown.left) {
 				player.x -= 5;
-			}
+			}			
 			if (keydown.right) {
 				player.x += 5;
 			}
@@ -87,12 +98,20 @@
 				player.height += player.height*.01;
 				
 			}
+			if (keydown.i) {
+				inventory.active == 0 ? inventory.active = 1 : inventory.active = 0;				
+			}
+
+			
 			player.x = player.x.clamp(0, CANVAS_WIDTH - player.width);
 		}
 
 		function draw() {
 			canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 			background.draw();
+			if (inventory.active) {
+				inventory.draw();
+			}
 
 			if (player.y < 395) {
 				player.draw();
