@@ -1,18 +1,47 @@
 <html>
 <head>
 	<style>
+	#game {
+		margin: 0 auto;
+		left:50%;
+		
+	}
+	#main {
+		display: block;
+		margin: 0 auto;	
+	}
+	#inventory {
+		display: block;
+		margin: 0 auto;
+	}
 	</style>
 	<script type="text/javascript" src="javascript/jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="javascript/jqueryhotkeys.js"></script>
 	<script type="text/javascript" src="javascript/key_status.js"></script>
+	
 </head>
 
 <body>
-	
+	<div id="game">
+		<canvas width="800" height="50" id="inventory"></canvas>
+		<canvas width="800" height="600" id="main"></canvas>
+	</div>
 
 	<script type="text/javascript" src="javascript/ideophage-canvas.js"></script>
 	
 	<script type="text/javascript">
+	
+	//Helper function to constrain things from runningo off the screen
+	
+		Number.prototype.clamp = function(min, max) {
+			return Math.min(Math.max(this, min), max);
+		};
+	
+	//Main game canvas. Useful to have them as variables	
+		var CANVAS_WIDTH = $("#main")[0].width;
+        var CANVAS_HEIGHT = $("#main")[0].height;
+
+	/* Load sprite assets */
 		var sprite = new Image();
 		sprite.src = "assets/ada_walking1.gif";
 
@@ -21,28 +50,23 @@
 
 		var pedastal_image = new Image();
 		pedastal_image.src = "assets/pedastal.png";
-		
-		Number.prototype.clamp = function(min, max) {
-		  return Math.min(Math.max(this, min), max);
-		};
-		
-		var CANVAS_WIDTH = 800;
-		var CANVAS_HEIGHT = 600;
 
-		var canvasElement = $("<canvas width='" + CANVAS_WIDTH + 
-		                      "' height='" + CANVAS_HEIGHT + "'></canvas>");
-		var canvas = canvasElement.get(0).getContext("2d");
-		canvasElement.appendTo('body');
+		var pedastal_greenx_image = new Image();
+		pedastal_greenx_image.src = "assets/pedastal_greenx.png";
 
-		var FPS = 30;
-		setInterval(function() {
-		  update();
-		  draw();
-		}, 1000/FPS);
-		
+		var inventory_image = new Image();
+		inventory_image.src = "assets/inventory-i.png";
+
+	/* Set Canvas contexts */
+				
+		var canvas = document.getElementById("main").getContext("2d");
+		var canvas_inventory = document.getElementById("inventory").getContext("2d");
+
+	/* Sprite and other object data */
+	
 		var player = {
 		  x: 220,
-		  y: 400,
+		  y: 450,
 		  width: 85,
 		  height: 125,
 		  draw: function() {
@@ -63,67 +87,133 @@
 		var pedastal = {
 		  x: 290,
 		  y: 320,
+		  width:161,
+		  height:261,
+		  active:0,
 		  draw: function() {
-			canvas.drawImage(pedastal_image, this.x, this.y);			
-		  }
+			this.active ? canvas.drawImage(pedastal_image, this.x, this.y) : canvas.drawImage(pedastal_greenx_image, this.x, this.y);
+		  },
+		  	clicked: function() {
+			if (coordinates.x >= this.x && coordinates.x <= (this.x + this.width) && coordinates.y >= this.y && coordinates.y <= (this.y + this.height)) {
+					return true;
+			}
+			else {
+				return false;
+			}
+	  	}
 		};
+		
+
+		var inventory_logo = {
+			x: 0,
+			y: 550,
+			width: 50,
+			height: 50,
+			draw: function() {
+				canvas.drawImage(inventory_image, this.x, this.y, this.width, this.height);
+			},
+  		  	clicked: function() {
+				if (coordinates.x >= this.x && coordinates.x <= (this.x + this.width) && coordinates.y >= this.y && coordinates.y <= (this.y + this.height)) {
+  					return true;
+				}
+				else {
+					return false;
+				}
+		  	}
+		}
 
 		var inventory = {
 		  x: 0,
 		  y: 0,
+		  width:800,
+		  height:100,
 		  active: 0,
 		  draw: function() {
-	  		canvas.globalAlpha=0.5;
-  		    canvas.fillRect(this.x, this.y, 800,100);
-	  		canvas.globalAlpha=1;			
+			  canvas_inventory.globalAlpha=0.5;
+			  canvas_inventory.fillRect(this.x, this.y, 800, 50);
+			  canvas_inventory.globalAlpha=1;
 		  }
 		};
 		
+		/* Record Clicks on the main canvas */
+		$('#main').click(function (e) { 
+			//Offset mouse Position
+			var posX = $(this).offset().left
+			var posY = $(this).offset().top;
+			var click_x = e.pageX - posX; 
+			var click_y = e.pageY - posY;
+			var coordinates = {
+				x:click_x,
+				y:click_y
+			};
+			hotspot_check(coordinates);
+		});
+
 		
+		//Run click coordinates through a hotspot check to see if it should do anything with the clicks
+		function hotspot_check(coordinates) {
+			//inventory
+			if (inventory_logo.clicked) {
+				inventory.active ? inventory.active = false : inventory.active = true;
+			};
+			
+			
+		};
+		
+		//Record keypresses and any other info that should be checked or updated every frame
 		function update() {
 			if (keydown.left) {
 				player.x -= 5;
 			}			
 			if (keydown.right) {
 				player.x += 5;
+				
 			}
 			if (keydown.up) {
-				player.y -= 5;
-				player.width -= player.width*.01;
-				player.height -= player.height*.01;
+				if (player.y > 410) {
+					player.y -= 5;
+				}
+				// player.width -= player.width*.01;
+				// player.height -= player.height*.01;
 			}
 			if (keydown.down) {
 				player.y += 5;
-				player.width += player.width*.01;
-				player.height += player.height*.01;
-				
+				// player.width += player.width*.01;
+				// player.height += player.height*.01;				
 			}
-			if (keydown.i) {
-				inventory.active == 0 ? inventory.active = 1 : inventory.active = 0;				
-			}
-
 			
+			//Fix any boundary issues
 			player.x = player.x.clamp(0, CANVAS_WIDTH - player.width);
+			player.y = player.y.clamp(0, CANVAS_HEIGHT - player.height);						
 		}
 
-		function draw() {
-			canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-			background.draw();
-			if (inventory.active) {
-				inventory.draw();
-			}
+	//Set frame rate
+		var fps = 30;
 
-			if (player.y < 395) {
-				player.draw();
-				pedastal.draw();				
-			}
-			else {
+	//Main drawing function calls itself, runs update, and draws everything it should
+		function draw() {
+			setTimeout(function() {
+				requestAnimationFrame(draw);
+				update();
+
+				canvas.clearRect(0, 0, $("#main")[0].width, $("#main")[0].height);
+				background.draw();	
+
+				if (inventory.active) {
+					inventory.draw();
+				}
+				else {
+					canvas_inventory.clearRect(0,0,$("#inventory")[0].width, $("#inventory")[0].height);
+				};
+
 				pedastal.draw();			
 				player.draw();
-			}
+				inventory_logo.draw();
+			}, 1000 / fps);
 		}
 
-	
+	//Start it all off
+		draw();
 	</script>
 </body>
 
