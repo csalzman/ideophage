@@ -42,8 +42,6 @@
         var CANVAS_HEIGHT = $("#main")[0].height;
 
 	/* Load sprite assets */
-		var sprite = new Image();
-		sprite.src = "assets/ada_walking1.gif";
 
 		var background_image = new Image();
 		background_image.src = "assets/forgetfulroom_scene.gif";
@@ -57,6 +55,26 @@
 		var inventory_image = new Image();
 		inventory_image.src = "assets/inventory-i.png";
 
+		var key_image = new Image();
+		key_image.src = "assets/key.png";
+		
+		var woman_walking_left = new Array();
+
+		for (var i = 1; i < 8; i++) {
+			console.log(i);
+			woman_walking_left[i] = new Image();
+			woman_walking_left[i].src = "assets/ada_walking_left_" + i + ".png";
+		}
+
+		var woman_walking_right = new Array();
+
+		for (var i = 1; i < 8; i++) {
+
+			woman_walking_right[i] = new Image();
+			woman_walking_right[i].src = "assets/ada_walking_right_" + i + ".png";
+		}
+
+
 	/* Set Canvas contexts */
 				
 		var canvas = document.getElementById("main").getContext("2d");
@@ -69,8 +87,16 @@
 		  y: 450,
 		  width: 85,
 		  height: 125,
-		  draw: function() {
-			canvas.drawImage(sprite, this.x, this.y, this.width, this.height);			
+		  direction: "right",
+		  walk_cycle: 1,
+		  draw: function(direction) {
+			  if (direction == "right") {
+	  				canvas.drawImage(woman_walking_right[this.walk_cycle], this.x, this.y, this.width, this.height);
+			  }
+			  if (direction == "left") {
+	  				canvas.drawImage(woman_walking_left[this.walk_cycle], this.x, this.y, this.width, this.height);
+			  }
+
 		  }
 		};
 
@@ -85,25 +111,50 @@
 		};
 
 		var pedastal = {
-		  x: 290,
-		  y: 320,
-		  width:161,
-		  height:261,
-		  active:0,
-		  draw: function() {
-			this.active ? canvas.drawImage(pedastal_image, this.x, this.y) : canvas.drawImage(pedastal_greenx_image, this.x, this.y);
-		  },
-		  	clicked: function() {
-			if (coordinates.x >= this.x && coordinates.x <= (this.x + this.width) && coordinates.y >= this.y && coordinates.y <= (this.y + this.height)) {
-					return true;
+			x: 290,
+			y: 320,
+			width:161,
+			height:261,
+			active:1,
+			draw: function() {
+				this.active ? canvas.drawImage(pedastal_image, this.x, this.y) : canvas.drawImage(pedastal_greenx_image, this.x, this.y);
+			},
+			clicked: function(coordinates) {
+				if (coordinates.x >= this.x && coordinates.x <= (this.x + this.width) && coordinates.y >= this.y && coordinates.y <= (this.y + this.height)) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
 			}
-			else {
-				return false;
-			}
-	  	}
 		};
 		
+		var key = {
+			x: 500,
+			y: 550,
+			width:50,
+			height:32,
+			item:"field",
+			inventory_slot:undefined,
+			draw: function() {
+				if (this.item == "field") {
+					canvas.drawImage(key_image, this.x, this.y, this.width, this.height);					
+				}
+				if (this.item =="inventory") {
+					canvas_inventory.drawImage(key_image, 0, 0);
+				}
 
+			},
+			clicked: function(coordinates) {
+				if (coordinates.x >= this.x && coordinates.x <= (this.x + this.width) && coordinates.y >= this.y && coordinates.y <= (this.y + this.height)) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+			}
+		};
+		
 		var inventory_logo = {
 			x: 0,
 			y: 550,
@@ -112,12 +163,12 @@
 			draw: function() {
 				canvas.drawImage(inventory_image, this.x, this.y, this.width, this.height);
 			},
-  		  	clicked: function() {
+  		  	clicked: function(coordinates) {
 				if (coordinates.x >= this.x && coordinates.x <= (this.x + this.width) && coordinates.y >= this.y && coordinates.y <= (this.y + this.height)) {
-  					return true;
+  					return 1;
 				}
 				else {
-					return false;
+					return 0;
 				}
 		  	}
 		}
@@ -149,37 +200,83 @@
 			hotspot_check(coordinates);
 		});
 
+		/* Record clicks on inventory */
+		$('#inventory').click(function (e) { 
+			//Offset mouse Position
+			var posX = $(this).offset().left
+			var posY = $(this).offset().top;
+			var click_x = e.pageX - posX; 
+			var click_y = e.pageY - posY;
+			var coordinates = {
+				x:click_x,
+				y:click_y
+			};
+			inventory_click_check(coordinates);
+		});
+
 		
 		//Run click coordinates through a hotspot check to see if it should do anything with the clicks
 		function hotspot_check(coordinates) {
 			//inventory
-			if (inventory_logo.clicked) {
+			if (inventory_logo.clicked(coordinates) == true) {
 				inventory.active ? inventory.active = false : inventory.active = true;
-			};
-			
-			
+			}
+			//pedastal
+			if (pedastal.clicked(coordinates) == true) {
+				pedastal.active ? pedastal.active = false : pedastal.active = true;
+			}
+			if (key.clicked(coordinates) == true) {
+				key.item = "inventory";
+			}
 		};
+		
+		function inventory_click_check(coordinates) {
+			var position = Math.floor(coordinates.x/100);
+			console.log(position);
+		}
 		
 		//Record keypresses and any other info that should be checked or updated every frame
 		function update() {
 			if (keydown.left) {
-				player.x -= 5;
+				player.x -= 10;
+				player.direction = "left";
+				if (player.walk_cycle > 6) {
+					player.walk_cycle = 1;
+				} 
+				else {
+					player.walk_cycle += 1;
+				}
+				
 			}			
 			if (keydown.right) {
-				player.x += 5;
-				
+				player.x += 10;
+				player.direction = "right";
+				if (player.walk_cycle > 6) {
+					player.walk_cycle = 1;
+				} 
+				else {
+					player.walk_cycle += 1;
+				}
 			}
 			if (keydown.up) {
 				if (player.y > 410) {
 					player.y -= 5;
 				}
-				// player.width -= player.width*.01;
-				// player.height -= player.height*.01;
+				if (player.walk_cycle > 6) {
+					player.walk_cycle = 1;
+				} 
+				else {
+					player.walk_cycle += 1;
+				}
 			}
 			if (keydown.down) {
 				player.y += 5;
-				// player.width += player.width*.01;
-				// player.height += player.height*.01;				
+				if (player.walk_cycle > 6) {
+					player.walk_cycle = 1;
+				} 
+				else {
+					player.walk_cycle += 1;
+				}
 			}
 			
 			//Fix any boundary issues
@@ -188,7 +285,7 @@
 		}
 
 	//Set frame rate
-		var fps = 30;
+		var fps = 15;
 
 	//Main drawing function calls itself, runs update, and draws everything it should
 		function draw() {
@@ -206,8 +303,10 @@
 					canvas_inventory.clearRect(0,0,$("#inventory")[0].width, $("#inventory")[0].height);
 				};
 
-				pedastal.draw();			
-				player.draw();
+				pedastal.draw();
+				console.log(player.walk_cycle);			
+				player.draw(player.direction);
+				key.draw();
 				inventory_logo.draw();
 			}, 1000 / fps);
 		}
