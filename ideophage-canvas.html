@@ -28,7 +28,9 @@
 	</div>
 
 	<script type="text/javascript" src="javascript/ideophage-canvas.js"></script>
-	
+	<script type="text/javascript" src="javascript/ideophage-load-assets.js"></script>
+	<script type="text/javascript" src="javascript/ideophage-asset-objects.js"></script>	
+
 	<script type="text/javascript">
 	
 	//Helper function to constrain things from runningo off the screen
@@ -41,151 +43,11 @@
 		var CANVAS_WIDTH = $("#main")[0].width;
         var CANVAS_HEIGHT = $("#main")[0].height;
 
-	/* Load sprite assets */
-
-		var background_image = new Image();
-		background_image.src = "assets/forgetfulroom_scene.gif";
-
-		var pedastal_image = new Image();
-		pedastal_image.src = "assets/pedastal.png";
-
-		var pedastal_greenx_image = new Image();
-		pedastal_greenx_image.src = "assets/pedastal_greenx.png";
-
-		var inventory_image = new Image();
-		inventory_image.src = "assets/inventory-i.png";
-
-		var key_image = new Image();
-		key_image.src = "assets/key.png";
-		
-		var woman_walking_left = new Array();
-
-		for (var i = 1; i < 8; i++) {
-			console.log(i);
-			woman_walking_left[i] = new Image();
-			woman_walking_left[i].src = "assets/ada_walking_left_" + i + ".png";
-		}
-
-		var woman_walking_right = new Array();
-
-		for (var i = 1; i < 8; i++) {
-
-			woman_walking_right[i] = new Image();
-			woman_walking_right[i].src = "assets/ada_walking_right_" + i + ".png";
-		}
-
-
 	/* Set Canvas contexts */
 				
 		var canvas = document.getElementById("main").getContext("2d");
 		var canvas_inventory = document.getElementById("inventory").getContext("2d");
 
-	/* Sprite and other object data */
-	
-		var player = {
-		  x: 220,
-		  y: 450,
-		  width: 85,
-		  height: 125,
-		  direction: "right",
-		  walk_cycle: 1,
-		  draw: function(direction) {
-			  if (direction == "right") {
-	  				canvas.drawImage(woman_walking_right[this.walk_cycle], this.x, this.y, this.width, this.height);
-			  }
-			  if (direction == "left") {
-	  				canvas.drawImage(woman_walking_left[this.walk_cycle], this.x, this.y, this.width, this.height);
-			  }
-
-		  }
-		};
-
-		var background = {
-		  x: 0,
-		  y: 0,
-		  width: 800,
-		  height: 600,
-		  draw: function() {
-			canvas.drawImage(background_image, this.x, this.y);			
-		  }
-		};
-
-		var pedastal = {
-			x: 290,
-			y: 320,
-			width:161,
-			height:261,
-			active:1,
-			draw: function() {
-				this.active ? canvas.drawImage(pedastal_image, this.x, this.y) : canvas.drawImage(pedastal_greenx_image, this.x, this.y);
-			},
-			clicked: function(coordinates) {
-				if (coordinates.x >= this.x && coordinates.x <= (this.x + this.width) && coordinates.y >= this.y && coordinates.y <= (this.y + this.height)) {
-					return 1;
-				}
-				else {
-					return 0;
-				}
-			}
-		};
-		
-		var key = {
-			x: 500,
-			y: 550,
-			width:50,
-			height:32,
-			item:"field",
-			inventory_slot:undefined,
-			draw: function() {
-				if (this.item == "field") {
-					canvas.drawImage(key_image, this.x, this.y, this.width, this.height);					
-				}
-				if (this.item =="inventory") {
-					canvas_inventory.drawImage(key_image, 0, 0);
-				}
-
-			},
-			clicked: function(coordinates) {
-				if (coordinates.x >= this.x && coordinates.x <= (this.x + this.width) && coordinates.y >= this.y && coordinates.y <= (this.y + this.height)) {
-					return 1;
-				}
-				else {
-					return 0;
-				}
-			}
-		};
-		
-		var inventory_logo = {
-			x: 0,
-			y: 550,
-			width: 50,
-			height: 50,
-			draw: function() {
-				canvas.drawImage(inventory_image, this.x, this.y, this.width, this.height);
-			},
-  		  	clicked: function(coordinates) {
-				if (coordinates.x >= this.x && coordinates.x <= (this.x + this.width) && coordinates.y >= this.y && coordinates.y <= (this.y + this.height)) {
-  					return 1;
-				}
-				else {
-					return 0;
-				}
-		  	}
-		}
-
-		var inventory = {
-		  x: 0,
-		  y: 0,
-		  width:800,
-		  height:100,
-		  active: 0,
-		  draw: function() {
-			  canvas_inventory.globalAlpha=0.5;
-			  canvas_inventory.fillRect(this.x, this.y, 800, 50);
-			  canvas_inventory.globalAlpha=1;
-		  }
-		};
-		
 		/* Record Clicks on the main canvas */
 		$('#main').click(function (e) { 
 			//Offset mouse Position
@@ -217,10 +79,6 @@
 		
 		//Run click coordinates through a hotspot check to see if it should do anything with the clicks
 		function hotspot_check(coordinates) {
-			//inventory
-			if (inventory_logo.clicked(coordinates) == true) {
-				inventory.active ? inventory.active = false : inventory.active = true;
-			}
 			//pedastal
 			if (pedastal.clicked(coordinates) == true) {
 				pedastal.active ? pedastal.active = false : pedastal.active = true;
@@ -277,11 +135,31 @@
 				else {
 					player.walk_cycle += 1;
 				}
+
 			}
-			
-			//Fix any boundary issues
+
+			//Fix any border boundary issues
 			player.x = player.x.clamp(0, CANVAS_WIDTH - player.width);
-			player.y = player.y.clamp(0, CANVAS_HEIGHT - player.height);						
+			player.y = player.y.clamp(0, CANVAS_HEIGHT - player.height);
+			
+			large_fire.keyframe == 7 ? large_fire.keyframe = 1 : large_fire.keyframe += 1;
+			small_fire.keyframe == 7 ? small_fire.keyframe = 1 : small_fire.keyframe += 1;
+			if (traitor.hover_state == "up") {
+				traitor.hover -= 1;
+			}
+			if (traitor.hover_state == "down") {
+				traitor.hover += 1;
+			}
+			if (traitor.hover == 250) {
+				traitor.hover = 249;
+				traitor.hover_state = "up"
+			}
+			if (traitor.hover == 225) {
+				traitor.hover = 226;
+				traitor.hover_state = "down";
+			}
+			console.log(traitor.hover);
+			
 		}
 
 	//Set frame rate
@@ -304,10 +182,19 @@
 				};
 
 				pedastal.draw();
-				console.log(player.walk_cycle);			
+				small_fire.draw(small_fire.keyframe, 400, 550, 32, 24);
+				large_fire.draw(large_fire.keyframe, 420, 553, 32, 24);
+				large_fire.draw(large_fire.keyframe, 440, 555, 32, 24);
+				large_fire.draw(large_fire.keyframe, 460, 553, 32, 24);
+				large_fire.draw(large_fire.keyframe, 480, 555, 32, 24);
+				large_fire.draw(large_fire.keyframe, 500, 553, 32, 24);
+				small_fire.draw(small_fire.keyframe, 520, 550, 32, 24);				
 				player.draw(player.direction);
-				key.draw();
-				inventory_logo.draw();
+				
+				traitor.draw(traitor.hover);
+
+				inventory.draw();
+				// key.draw();
 			}, 1000 / fps);
 		}
 
