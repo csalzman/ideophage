@@ -14,6 +14,10 @@
 		display: block;
 		margin: 0 auto;
 	}
+	@font-face {
+	    font-family: "NES";
+	    src: url("fonts/Nintendo-DS-BIOS.ttf");
+	}	
 	</style>
 	<script type="text/javascript" src="javascript/jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="javascript/jqueryhotkeys.js"></script>
@@ -158,7 +162,6 @@
 				traitor.hover = 226;
 				traitor.hover_state = "down";
 			}
-			console.log(traitor.hover);
 			
 		}
 
@@ -192,6 +195,23 @@
 				player.draw(player.direction);
 				
 				traitor.draw(traitor.hover);
+				//context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
+				var p = 0;
+				for (var z = 0; z < 100; z++) {
+					if (p == 0) {
+						canvas.drawImage(traitor_image,0,z,100,1,(300+z),(300+z),100,1);
+						p = 1;
+					}
+					else {
+						canvas.drawImage(traitor_image,0,z,100,1,(300-z),(300+z),100,1);
+						p = 0;
+					}
+				}
+				canvas.save();
+				canvas.rotate(-45, 100, 100);
+				canvas.strokeText("SDKJFKDJFKJDFKJDKJ", 100, 100);
+				canvas.restore();
+
 
 				inventory.draw();
 				// key.draw();
